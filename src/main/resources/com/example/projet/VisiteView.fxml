@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controller.VisiteController">
+
+    <!-- Barre du haut : logo, titre, recherche, bouton -->
+    <top>
+        <VBox spacing="10" style="-fx-background-color: #0e8f95; -fx-padding: 10;">
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <!-- Logo -->
+                <ImageView fitHeight="40" preserveRatio="true">
+                    <image>
+                        <Image url="@images/logo.jpg" />
+                    </image>
+                </ImageView>
+
+                <!-- Titre -->
+                <Label text="Gestion des Visites"
+                       style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Champ de recherche -->
+                <TextField fx:id="searchField"
+                           promptText="Rechercher une visite..."
+                           prefWidth="300"/>
+
+                <!-- Bouton Ajouter -->
+                <Button fx:id="addButton"
+                        text="Ajouter"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- Centre : TableView des visites -->
+    <center>
+        <TableView fx:id="visiteTable"
+                   prefWidth="900"
+                   prefHeight="400">
+            <columns>
+                <TableColumn fx:id="idColumn" text="ID" prefWidth="60"/>
+                <TableColumn fx:id="patientColumn" text="Patient" prefWidth="200"/>
+                <TableColumn fx:id="dateColumn" text="Date" prefWidth="150"/>
+                <TableColumn fx:id="etatColumn" text="État" prefWidth="150"/>
+                <TableColumn fx:id="actionColumn" text="Actions" prefWidth="120"/>
+            </columns>
+        </TableView>
+    </center>
+
+</BorderPane>

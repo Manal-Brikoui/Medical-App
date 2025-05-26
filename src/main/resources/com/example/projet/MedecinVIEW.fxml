@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controller.MedecinController">
+
+    <!-- Barre du haut : logo, titre, recherche, bouton -->
+    <top>
+        <VBox spacing="10" style="-fx-background-color: #0e8f95; -fx-padding: 10;">
+
+            <!-- Ligne logo + titre + boutons -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <!-- Logo -->
+                <ImageView fitHeight="40" preserveRatio="true">
+                    <image>
+                        <Image url="@images/logo.jpg" />
+                    </image>
+                </ImageView>
+
+                <!-- Titre -->
+                <Label text="Gestion des Médecins"
+                       style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Recherche -->
+                <TextField fx:id="searchField"
+                           promptText="Rechercher un médecin..."
+                           prefWidth="300"/>
+
+                <!-- Bouton Ajouter -->
+                <Button fx:id="addButton"
+                        text="Ajouter"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- Centre : tableau des médecins -->
+    <center>
+        <TableView fx:id="medecinTable"
+                   prefWidth="900"
+                   prefHeight="400">
+            <columns>
+                <TableColumn fx:id="idColumn" text="ID" prefWidth="60"/>
+                <TableColumn fx:id="nomColumn" text="Nom" prefWidth="150"/>
+                <TableColumn fx:id="prenomColumn" text="Prénom" prefWidth="150"/>
+                <TableColumn fx:id="specialiteColumn" text="Spécialité" prefWidth="200"/>
+                <TableColumn fx:id="actionColumn" text="Actions" prefWidth="120"/>
+            </columns>
+        </TableView>
+    </center>
+
+</BorderPane>

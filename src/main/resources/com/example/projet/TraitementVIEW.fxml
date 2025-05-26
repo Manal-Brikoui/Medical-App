@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controller.TraitementController">
+
+    <!-- Barre du haut : logo à gauche, titre, recherche, boutons -->
+    <top>
+        <HBox spacing="15" style="-fx-background-color: #0e8f95; -fx-padding: 10;" alignment="CENTER_LEFT">
+
+            <!-- Logo à gauche -->
+            <VBox alignment="TOP_CENTER">
+                <ImageView fitHeight="50" preserveRatio="true">
+                    <image>
+                        <Image url="@images/logo.jpg"/>
+                    </image>
+                </ImageView>
+            </VBox>
+
+            <!-- Titre -->
+            <Label text="Gestion des Traitements"
+                   style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" />
+
+            <!-- Espace extensible -->
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Champ de recherche -->
+            <TextField fx:id="searchField"
+                       promptText="Rechercher un traitement..."
+                       prefWidth="250"
+                       style="-fx-background-radius: 5;" />
+
+            <!-- Boutons -->
+            <Button fx:id="addButton"
+                    text="Ajouter"
+                    style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;" />
+
+        </HBox>
+    </top>
+
+    <!-- Centre : TableView des traitements -->
+    <center>
+        <TableView fx:id="traitementTable"
+                   prefWidth="900"
+                   prefHeight="400">
+            <columns>
+                <TableColumn fx:id="idColumn" text="ID" prefWidth="60"/>
+                <TableColumn fx:id="patientIdColumn" text="ID Patient" prefWidth="80"/>
+                <TableColumn fx:id="medecinIdColumn" text="ID Médecin" prefWidth="80"/>
+                <TableColumn fx:id="patientNomColumn" text="Nom Patient" prefWidth="150"/>
+                <TableColumn fx:id="medecinNomColumn" text="Nom Médecin" prefWidth="150"/>
+                <TableColumn fx:id="medicamentColumn" text="Médicament" prefWidth="120"/>
+                <TableColumn fx:id="doseColumn" text="Dose" prefWidth="100"/>
+                <TableColumn fx:id="dateDebutColumn" text="Date Début" prefWidth="100"/>
+                <TableColumn fx:id="dateFinColumn" text="Date Fin" prefWidth="100"/>
+                <TableColumn fx:id="actionColumn" text="Actions" prefWidth="120"/>
+            </columns>
+        </TableView>
+    </center>
+
+</BorderPane>
