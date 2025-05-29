@@ -19,39 +19,34 @@ import java.util.function.Predicate;
 
 public class VisiteController {
 
-    @FXML
-    private TableView<Visite> visiteTable;
-    @FXML
-    private TableColumn<Visite, Integer> idColumn;
-    @FXML
-    private TableColumn<Visite, String> patientColumn;
-    @FXML
-    private TableColumn<Visite, LocalDate> dateColumn;
-    @FXML
-    private TableColumn<Visite, String> etatColumn;
-    @FXML
-    private TableColumn<Visite, Void> actionColumn;
+    // FXML éléments liés à la vue
+    @FXML private TableView<Visite> visiteTable;
+    @FXML private TableColumn<Visite, Integer> idColumn;
+    @FXML private TableColumn<Visite, String> patientColumn;
+    @FXML private TableColumn<Visite, LocalDate> dateColumn;
+    @FXML private TableColumn<Visite, String> etatColumn;
+    @FXML private TableColumn<Visite, Void> actionColumn;
 
-    @FXML
-    private TextField searchField;
+    @FXML private TextField searchField;
+    @FXML private Button addButton;
 
-    @FXML
-    private Button addButton;
-
+    // DAO pour la gestion des données
     private VisiteDAO visiteDAO = new VisiteDAO();
+
+    // Liste observable liée à la TableView
     private ObservableList<Visite> visiteList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        // Config des colonnes
+        // Initialisation des colonnes avec les propriétés du modèle Visite
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         patientColumn.setCellValueFactory(new PropertyValueFactory<>("patientNom"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("dateVisite"));
         etatColumn.setCellValueFactory(new PropertyValueFactory<>("etatRendu"));
 
-        // Personnalisation de la colonne état avec un rectangle coloré
+        // Personnalisation de la colonne "état" avec une couleur pour chaque état
         etatColumn.setCellFactory(col -> new TableCell<Visite, String>() {
-            private final Rectangle rect = new Rectangle(20, 20);
+            private final Rectangle rect = new Rectangle(20, 20); // carré coloré
 
             @Override
             protected void updateItem(String etat, boolean empty) {
@@ -60,6 +55,7 @@ public class VisiteController {
                     setGraphic(null);
                     setText(null);
                 } else {
+                    // Couleur selon l'état
                     switch (etat.toLowerCase()) {
                         case "vu":
                             rect.setFill(Color.LIMEGREEN);
@@ -74,33 +70,36 @@ public class VisiteController {
                         default:
                             rect.setFill(Color.GRAY);
                     }
-                    setGraphic(rect);
-                    setText(etat); // Affiche aussi le texte (optionnel)
+                    setGraphic(rect); // carré coloré
+                    setText(etat);    // texte d'état
                 }
             }
         });
 
+        // Chargement des visites depuis la base
         loadVisites();
 
-        // Colonne Action (Modifier, Supprimer)
+        // Ajout des boutons Modifier/Supprimer à la TableView
         addActionButtons();
 
-        // Recherche dynamique
+        // Recherche dynamique avec filtre
         FilteredList<Visite> filteredData = new FilteredList<>(visiteList, p -> true);
         visiteTable.setItems(filteredData);
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             filteredData.setPredicate(createPredicate(newVal));
         });
 
-        // Bouton Ajouter
+        // Action pour le bouton Ajouter
         addButton.setOnAction(e -> showAddDialog());
     }
 
+    // Chargement des visites depuis la base de données
     private void loadVisites() {
         List<Visite> list = visiteDAO.getAllVisites();
         visiteList.setAll(list);
     }
 
+    // Création du prédicat de filtre pour la recherche
     private Predicate<Visite> createPredicate(String searchText) {
         return visite -> {
             if (searchText == null || searchText.isEmpty()) return true;
@@ -110,27 +109,31 @@ public class VisiteController {
         };
     }
 
+    // Ajout des boutons Modifier et Supprimer dans la colonne "Actions"
     private void addActionButtons() {
         actionColumn.setCellFactory(col -> new TableCell<>() {
             private final Button btnEdit = new Button("Modifier");
             private final Button btnDelete = new Button("Supprimer");
-            private final VBox pane = new VBox(5, btnEdit, btnDelete);
+            private final VBox pane = new VBox(5, btnEdit, btnDelete); // disposition verticale
 
             {
+                // Style des boutons
                 btnEdit.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
                 btnDelete.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
 
+                // Action du bouton Modifier
                 btnEdit.setOnAction(e -> {
                     Visite v = getTableView().getItems().get(getIndex());
                     showEditDialog(v);
                 });
 
+                // Action du bouton Supprimer
                 btnDelete.setOnAction(e -> {
                     Visite v = getTableView().getItems().get(getIndex());
                     boolean confirm = confirmDelete();
                     if (confirm) {
                         if (visiteDAO.deleteVisite(v.getId())) {
-                            visiteList.remove(v);
+                            visiteList.remove(v); // suppression de la liste
                             showAlert(Alert.AlertType.INFORMATION, "Suppression", "Visite supprimée");
                         } else {
                             showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de la suppression");
@@ -142,21 +145,24 @@ public class VisiteController {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty ? null : pane);
+                setGraphic(empty ? null : pane); // afficher le VBox avec les deux boutons
             }
         });
     }
 
+    // Dialogue de confirmation de suppression
     private boolean confirmDelete() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?", ButtonType.OK, ButtonType.CANCEL);
         alert.setTitle("Confirmation");
         return alert.showAndWait().filter(btn -> btn == ButtonType.OK).isPresent();
     }
 
+    // Fenêtre d'ajout de nouvelle visite
     private void showAddDialog() {
         Dialog<Visite> dialog = new Dialog<>();
         dialog.setTitle("Ajouter Visite");
 
+        // Champs du formulaire
         Label lblPatientId = new Label("ID Patient:");
         TextField tfPatientId = new TextField();
 
@@ -168,6 +174,7 @@ public class VisiteController {
         cbEtat.getItems().addAll("Vu", "Absent", "Annulé");
         cbEtat.setValue("Vu");
 
+        // Mise en forme du formulaire
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -181,6 +188,7 @@ public class VisiteController {
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
+        // Conversion des données saisies en objet Visite
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
                 try {
@@ -199,6 +207,7 @@ public class VisiteController {
             return null;
         });
 
+        // Enregistrement de la nouvelle visite
         dialog.showAndWait().ifPresent(visite -> {
             if (visiteDAO.insertVisite(visite)) {
                 loadVisites();
@@ -209,10 +218,12 @@ public class VisiteController {
         });
     }
 
+    // Fenêtre d'édition d'une visite existante
     private void showEditDialog(Visite visite) {
         Dialog<Visite> dialog = new Dialog<>();
         dialog.setTitle("Modifier Visite");
 
+        // Champs pré-remplis
         Label lblPatientId = new Label("ID Patient:");
         TextField tfPatientId = new TextField(String.valueOf(visite.getPatientId()));
 
@@ -224,6 +235,7 @@ public class VisiteController {
         cbEtat.getItems().addAll("Vu", "Absent", "Annulé");
         cbEtat.setValue(visite.getEtatRendu());
 
+        // Mise en page
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -237,6 +249,7 @@ public class VisiteController {
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
+        // Mise à jour des données
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
                 try {
@@ -260,6 +273,7 @@ public class VisiteController {
             return null;
         });
 
+        // Enregistrement de la modification
         dialog.showAndWait().ifPresent(updatedVisite -> {
             if (visiteDAO.updateVisite(updatedVisite)) {
                 loadVisites();
@@ -270,6 +284,7 @@ public class VisiteController {
         });
     }
 
+    // Méthode utilitaire pour afficher des alertes
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

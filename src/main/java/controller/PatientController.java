@@ -18,6 +18,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public class PatientController {
+
+    // Déclaration des composants de l'interface graphique liés à la TableView
     @FXML private TableView<Patient> patientTable;
     @FXML private TableColumn<Patient, Integer> idColumn;
     @FXML private TableColumn<Patient, String> nomColumn;
@@ -31,11 +33,14 @@ public class PatientController {
     @FXML private TextField searchField;
     @FXML private Button addButton;
 
+    // Liste observable pour stocker les patients et permettre leur affichage dynamique
     private ObservableList<Patient> patientList;
     private FilteredList<Patient> filteredData;
 
+    // Méthode appelée automatiquement à l'initialisation du contrôleur
     @FXML
     public void initialize() {
+        // Liaison des colonnes de la TableView avec les propriétés de l'objet Patient
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         nomColumn.setCellValueFactory(new PropertyValueFactory<>("nom"));
         prenomColumn.setCellValueFactory(new PropertyValueFactory<>("prenom"));
@@ -45,24 +50,33 @@ public class PatientController {
         medicsColumn.setCellValueFactory(new PropertyValueFactory<>("medicaments"));
         medecinColumn.setCellValueFactory(new PropertyValueFactory<>("medecinsSuivi"));
 
+        // Chargement des données dans la table
         loadPatients();
+
+        // Ajout de boutons "Modifier" et "Supprimer" dans chaque ligne de la table
         addButtonToTable();
 
+        // Action associée au bouton "Ajouter"
         addButton.setOnAction(e -> openAddPatientDialog());
     }
 
+    // Chargement des patients depuis la base de données
     private void loadPatients() {
         PatientDAO dao = new PatientDAO();
         patientList = FXCollections.observableArrayList(dao.getAllPatients());
 
-        // Mise à jour du contenu de la TableView ici directement
+        // Application d'un filtre (par défaut tout est affiché)
         filteredData = new FilteredList<>(patientList, p -> true);
+
+        // Tri des données liées au tri de la TableView
         SortedList<Patient> sortedData = new SortedList<>(filteredData);
         sortedData.comparatorProperty().bind(patientTable.comparatorProperty());
+
+        // Remplissage de la TableView
         patientTable.setItems(sortedData);
     }
 
-
+    // Mise en place de la recherche en temps réel dans la table
     private void setupSearchFilter() {
         filteredData = new FilteredList<>(patientList, p -> true);
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
@@ -79,57 +93,59 @@ public class PatientController {
         patientTable.setItems(sortedData);
     }
 
+    // Ajout de boutons Modifier et Supprimer dans une colonne personnalisée
     private void addButtonToTable() {
         Callback<TableColumn<Patient, Void>, TableCell<Patient, Void>> cellFactory = param -> new TableCell<>() {
             private final Button btnEdit = new Button("Modifier");
             private final Button btnDelete = new Button("Supprimer");
-            private final VBox buttonBox = new VBox(5, btnEdit, btnDelete);
+            private final VBox buttonBox = new VBox(5, btnEdit, btnDelete); // Conteneur vertical
 
             {
+                // Style des boutons
                 btnEdit.setStyle("-fx-background-color: #2980b9; -fx-text-fill: white;");
                 btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
 
+                // Action "Modifier"
                 btnEdit.setOnAction(ev -> {
                     Patient p = getTableView().getItems().get(getIndex());
                     openEditPatientDialog(p);
                 });
 
+                // Action "Supprimer"
                 btnDelete.setOnAction(ev -> {
                     Patient p = getTableView().getItems().get(getIndex());
                     new PatientDAO().deletePatientById(p.getId());
-                    patientList.remove(p);
+                    patientList.remove(p); // Suppression de la liste observable
                 });
             }
 
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty ? null : buttonBox);
+                setGraphic(empty ? null : buttonBox); // Affiche les boutons uniquement si la ligne n'est pas vide
             }
         };
 
         actionColumn.setCellFactory(cellFactory);
     }
 
+    // Ouverture d'une boîte de dialogue pour ajouter un patient
     private void openAddPatientDialog() {
         Dialog<Patient> dialog = createPatientDialog(null);
         Optional<Patient> res = dialog.showAndWait();
         res.ifPresent(updated -> {
-            // Mise à jour en base de données
-            new PatientDAO().insertPatient(updated); // Utilise une méthode add, à toi de l’implémenter si nécessaire
-            patientList.add(updated);
-
-
-            patientTable.refresh();
+            new PatientDAO().insertPatient(updated); // Insertion en base
+            patientList.add(updated); // Ajout dans la liste observable
+            patientTable.refresh();   // Rafraîchissement de la TableView
         });
-
     }
 
+    // Ouverture d'une boîte de dialogue pour modifier un patient existant
     private void openEditPatientDialog(Patient patient) {
         Dialog<Patient> dialog = createPatientDialog(patient);
         Optional<Patient> res = dialog.showAndWait();
         res.ifPresent(updated -> {
-            // Mise à jour des champs
+            // Mise à jour des champs de l'objet existant
             patient.setNom(updated.getNom());
             patient.setPrenom(updated.getPrenom());
             patient.setDateNaissance(updated.getDateNaissance());
@@ -138,17 +154,19 @@ public class PatientController {
             patient.setMedicaments(updated.getMedicaments());
             patient.setMedecinsSuivi(updated.getMedecinsSuivi());
 
-            new PatientDAO().updatePatient(patient);
-            patientTable.refresh();
+            new PatientDAO().updatePatient(patient); // Mise à jour dans la base
+            patientTable.refresh(); // Rafraîchissement de l'affichage
         });
     }
 
+    // Création de la boîte de dialogue pour ajouter ou modifier un patient
     private Dialog<Patient> createPatientDialog(Patient existingPatient) {
         Dialog<Patient> dialog = new Dialog<>();
         dialog.setTitle(existingPatient == null ? "Ajouter un Patient" : "Modifier un Patient");
         ButtonType actionType = new ButtonType(existingPatient == null ? "Ajouter" : "Enregistrer", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(actionType, ButtonType.CANCEL);
 
+        // Création du formulaire avec champs
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -160,6 +178,7 @@ public class PatientController {
         TextField medsF   = new TextField();
         TextField medecF  = new TextField();
 
+        // Si modification, pré-remplissage des champs
         if (existingPatient != null) {
             nomF.setText(existingPatient.getNom());
             prenomF.setText(existingPatient.getPrenom());
@@ -170,6 +189,7 @@ public class PatientController {
             medecF.setText(existingPatient.getMedecinsSuivi());
         }
 
+        // Ajout des champs au formulaire
         grid.addRow(0, new Label("Nom:"), nomF);
         grid.addRow(1, new Label("Prénom:"), prenomF);
         grid.addRow(2, new Label("Date de naissance:"), datePicker);
@@ -180,16 +200,17 @@ public class PatientController {
 
         dialog.getDialogPane().setContent(grid);
 
+        // Désactivation du bouton tant que le champ nom est vide
         Node actionBtn = dialog.getDialogPane().lookupButton(actionType);
         actionBtn.setDisable(true);
         nomF.textProperty().addListener((o, ov, nv) -> actionBtn.setDisable(nv.trim().isEmpty()));
 
-// Ajout ici :
+        // Si on modifie et que nom est déjà rempli, activer le bouton
         if (existingPatient != null && !nomF.getText().trim().isEmpty()) {
             actionBtn.setDisable(false);
         }
 
-
+        // Définir le résultat à retourner quand l'utilisateur clique sur OK
         dialog.setResultConverter(bt -> {
             if (bt == actionType) {
                 return new Patient(

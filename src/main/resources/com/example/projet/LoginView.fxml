@@ -15,7 +15,7 @@
           maxWidth="250" prefWidth="250" maxHeight="200" prefHeight="200">
 
 
-    <Label text="Accès Sécurisé"
+        <Label text="Accès Sécurisé"
                style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #008fa1;" />
 
         <Label text="Code d'accès :"
